@@ -114,12 +114,20 @@ class OCR(Resource):
             )
             response_200(tif_techmd_request)
             tif_techmd_json = tif_techmd_request.json()
+
+            alto_request = requests.get(
+                "{}{}/ocr/limb".format(BLUEPRINT.config['RETRIEVER_URL'], page_id)
+            )
+            response_200(alto_request)
+            alto_str = alto_request.text
+
             width, height = tif_techmd_json['width'], tif_techmd_json['height']
             info_dict['identifier'] = page_id
             info_dict['tif_width'] = width
             info_dict['tif_height'] = height
             info_dict['jpg_width'] = args['jpg_width']
             info_dict['jpg_height'] = args['jpg_height']
+            info_dict['alto'] = alto_str
             info_dict['struct_page'] = None  # TODO
             info_dict['struct_milestone'] = None  # TODO
 
