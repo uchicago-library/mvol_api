@@ -162,6 +162,10 @@ class OCRBuilder:
     # End Copy-Pasted Meta Requirements
 
     def get_line_ocr_from_alto(self, alto):
+        """
+        Returns an array of dicts as expected by the get_leaf() function
+        Generates each dict from an ALTO input string
+        """
         # Dump ALTO Data to Etree
         alto_data = ElementTree.fromstring(alto)
         # Setup our container list for the line by line OCR Data
@@ -202,9 +206,18 @@ class OCRBuilder:
         return lines
 
     def get_line_ocr_from_pos(pos):
+        """
+        Returns an array of dicts as expected by the get_leaf() function
+        Generates each dict from a POS input string
+        """
+        # TODO
         raise NotImplementedError()
 
     def get_leaf(self, i, d):
+        """
+        Generates XML elements in the IA bookreader expected format for describing
+        a "leaf"
+        """
         leaf = ElementTree.Element("leaf")
         # Set leaf attribs
         leaf.attrib['leafNum'] = str(i)
@@ -222,9 +235,12 @@ class OCRBuilder:
         cropbox.attrib['w'] = str(d['jpg_width'])
         cropbox.attrib['h'] = str(d['jpg_height'])
         leaf.append(cropbox)
-        # Line element
+        # Line elements
+        # Compute relevant scalars
         x_scale = d['jpg_width'] / d['tif_width']
         y_scale = d['jpg_height'] / d['tif_height']
+        # Compute line level OCR data from a master source
+        # Alto implementation
         if 'alto' in d:
             for line in self.get_line_ocr_from_alto(d['alto']):
                 line_element = ElementTree.Element("line")
@@ -232,10 +248,11 @@ class OCRBuilder:
                 line_element.attrib['t'] = str(round(line['t'] * y_scale))
                 line_element.attrib['r'] = str(round(line['r'] * x_scale))
                 line_element.attrib['b'] = str(round(line['b'] * y_scale))
-                line_element.attrib['spacing'] = " ".join(str(round(x * x_scale)) for x in line['spacing'])
+                line_element.attrib['spacing'] = " ".join(str(round(x * x_scale))
+                                                          for x in line['spacing'])
                 line_element.text = line['text']
                 leaf.append(line_element)
-        # It must be pos metadata
+        # Not Alto - It must be pos metadata
         else:
             for line in self.get_line_ocr_from_pos(d['pos']):
                 line_element = ElementTree.Element("line")

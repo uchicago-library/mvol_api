@@ -2,14 +2,11 @@ import logging
 from urllib.parse import unquote
 import requests
 import re
-# Debugging
-from json import dumps
 
 # Not ideal
 # If we get rid of the requirement for the API to be
 # able to see the file system this API can run on a host
-# with significantly fewer permissions and a lot less
-# storage space.
+# with significantly fewer permissions
 from os import listdir
 from os.path import join
 
@@ -48,6 +45,44 @@ def handle_errors(error):
     return response
 
 
+def get_volumes(identifier):
+    if not re.match("^mvol-[0-9]{4}$", identifier):
+        raise ValueError("bad identifier")
+    path_parts = identifier.split("-")
+    path = join(
+        BLUEPRINT.config['MVOL_ROOT'],
+        *path_parts
+    )
+    volume_identifiers = []
+    for x in listdir(path):
+        volume_identifiers.append(identifier+"-"+x)
+
+    # Filter
+    volume_identifiers = [x for x in volume_identifiers if
+                          re.match("^mvol-[0-9]{4}-[0-9]{4}$", x)]
+
+    return sorted(volume_identifiers, key=lambda page: int(page[11:]))
+
+
+def get_issues(identifier):
+    if not re.match("^mvol-[0-9]{4}-[0-9]{4}$", identifier):
+        raise ValueError("bad identifier")
+    path_parts = identifier.split("-")
+    path = join(
+        BLUEPRINT.config['MVOL_ROOT'],
+        *path_parts
+    )
+    issue_identifiers = []
+    for x in listdir(path):
+        issue_identifiers.append(identifier+"-"+x)
+
+    # Filter
+    issue_identifiers = [x for x in issue_identifiers if
+                         re.match("^mvol-[0-9]{4}-[0-9]{4}-[0-9]{4}$", x)]
+
+    return sorted(issue_identifiers, key=lambda page: int(page[16:]))
+
+
 def get_pages(identifier):
     if not re.match("^mvol-[0-9]{4}-[0-9]{4}-[0-9]{4}$", identifier):
         raise ValueError("bad identifier")
@@ -62,6 +97,10 @@ def get_pages(identifier):
         page_identifiers.append(
             identifier+"_{}".format(x.split("_")[1][:-4])
         )
+
+    # Filter
+    page_identifiers = [x for x in page_identifiers if
+                        re.match("^mvol-[0-9]{4}-[0-9]{4}-[0-9]{4}_[0-9]{4}$", x)]
 
     return sorted(page_identifiers, key=lambda page: int(page[21:]))
 
@@ -78,13 +117,20 @@ class Root(Resource):
 
 class Nav(Resource):
     def get(self, identifier):
-        return {'self': unquote(identifier),
-                'children': get_pages(unquote(identifier))}
+        result = {}
+        result['self'] = unquote(identifier)
+        for x in get_pages, get_issues, get_volumes:
+            try:
+                result['children'] = x(unquote(identifier))
+            except ValueError:
+                pass
+        if 'children' not in result:
+            raise Error("Unrecognized Identifier!")
+        return result
 
 
 class OCR(Resource):
     def get(self, identifier):
-        # TODO: Parser for jpg width and height
         parser = reqparse.RequestParser()
         parser.add_argument('jpg_width', type=int, required=True)
         parser.add_argument('jpg_height', type=int, required=True)
@@ -134,9 +180,6 @@ class OCR(Resource):
             # Drop it in the bucket
             info_dicts.append(info_dict)
 
-#        log.debug(dc_str)
-#        log.debug(dumps(info_dicts, indent=2))
-
         builder = OCRBuilder(
             dc_str,
             info_dicts
@@ -152,6 +195,9 @@ def handle_configs(setup_state):
     if BLUEPRINT.config.get('DEFER_CONFIG'):
         log.debug("DEFER_CONFIG set, skipping configuration")
         return
+
+    if BLUEPRINT.config['RETRIEVER_URL'][-1] is not "/":
+        BLUEPRINT.config['RETRIEVER_URL'] = BLUEPRINT.config['RETRIEVER_URL'] + "/"
 
     if BLUEPRINT.config.get("VERBOSITY"):
         log.debug("Setting verbosity to {}".format(str(BLUEPRINT.config['VERBOSITY'])))
