@@ -63,7 +63,7 @@ def get_pages(identifier):
             identifier+"_{}".format(x.split("_")[1][:-4])
         )
 
-    return page_identifiers
+    return sorted(page_identifiers, key=lambda page: int(page[21:]))
 
 
 def response_200(r):
@@ -79,7 +79,7 @@ class Root(Resource):
 class Nav(Resource):
     def get(self, identifier):
         return {'self': unquote(identifier),
-                'children': sorted(get_pages(unquote(identifier)), key=lambda page: int(page[21:]))}
+                'children': get_pages(unquote(identifier))}
 
 
 class OCR(Resource):
@@ -134,8 +134,8 @@ class OCR(Resource):
             # Drop it in the bucket
             info_dicts.append(info_dict)
 
-        log.debug(dc_str)
-        log.debug(dumps(info_dicts, indent=2))
+#        log.debug(dc_str)
+#        log.debug(dumps(info_dicts, indent=2))
 
         builder = OCRBuilder(
             dc_str,
