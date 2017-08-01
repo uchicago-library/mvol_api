@@ -143,6 +143,14 @@ class OCR(Resource):
         response_200(dc_request)
         dc_str = dc_request.text
 
+        # Calc min_year
+        # TODO?
+        pass
+
+        # Calc max_year
+        # TODO?
+        pass
+
         # Get the struct
         # TODO
         pass
