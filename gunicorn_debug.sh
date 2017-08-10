@@ -1,1 +1,1 @@
-gunicorn mvol_api:app -w 4 -t 30 -b 0.0.0.0:5000
+gunicorn mvol_api:app -w ${MVOL_API_WORKERS:-4} -t ${MVOL_API_TIMEOUT:-30} -b ${MVOL_API_HOST:-0.0.0.0}:${MVOL_API_PORT:-5000}
