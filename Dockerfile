@@ -1,5 +1,4 @@
-FROM flask_stack
-# https://github.com/bnbalsamo/docker-flask_stack
+FROM bnbalsamo/flask_stack
 
 ARG MVOL_API_MVOL_ROOT
 ARG MVOL_API_RETRIEVER_URL
