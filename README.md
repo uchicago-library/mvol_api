@@ -41,5 +41,7 @@ Returns what identifiers compose this object
 ### Required URL Paramters
 * jpg_height: The height of the jpg derivative created in pixels
 * jpg_width: The width of the jpg derivative created in pixels
+* min_year: The minimum year to populate the IA OCR meta element
+* max_year: The maximum year to populate the IA OCR meta element
 
 Returns an IA book reader compliant xtf ocr file
