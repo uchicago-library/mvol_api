@@ -16,27 +16,32 @@ class OCRBuilder:
     # Begin Copy-Pasted Meta Requirements
 
     def get_human_readable_date(self):
-        months = {
-            '01': 'January',
-            '02': 'February',
-            '03': 'March',
-            '04': 'April',
-            '05': 'May',
-            '06': 'June',
-            '07': 'July',
-            '08': 'August',
-            '09': 'September',
-            '10': 'October',
-            '11': 'November',
-            '12': 'December'
-        }
-        d = self.get_dc_date().split('-')
-        if len(d) == 1:  # year
-            return d[0]
-        elif len(d) == 2:  # month  year
-            return '%s %s' % (months[d[1]], d[0])
-        else:
-            return '%s %d, %s' % (months[d[1]], int(d[2]), d[0])
+        try:
+            months = {
+                '01': 'January',
+                '02': 'February',
+                '03': 'March',
+                '04': 'April',
+                '05': 'May',
+                '06': 'June',
+                '07': 'July',
+                '08': 'August',
+                '09': 'September',
+                '10': 'October',
+                '11': 'November',
+                '12': 'December'
+            }
+            d = self.get_dc_date().split('-')
+            if len(d) == 1:  # year
+                return d[0]
+            elif len(d) == 2:  # month  year
+                return '%s %s' % (months[d[1]], d[0])
+            else:
+                return '%s %d, %s' % (months[d[1]], int(d[2]), d[0])
+        except:
+            # The above function doesn't behave will with weirdly formatted dates.
+            # If a date is a weird format just spit out whatever is in the DC exactly
+            return self.get_dc_date()
 
     def get_year_range(self):
         return '%s-%s' % (self.min_year, self.max_year)
