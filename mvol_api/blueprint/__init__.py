@@ -117,7 +117,8 @@ def get_struct(identifier):
     )
     with open(path) as f:
         reader = DictReader(f, delimiter="\t")
-    return reader
+        data = [x for x in reader]
+    return data
 
 
 
