@@ -116,7 +116,7 @@ def get_struct(identifier):
         identifier+".struct.txt"
     )
     with open(path) as f:
-        reader = DictReader(f)
+        reader = DictReader(f, delimiter="\t")
     return reader
 
 
