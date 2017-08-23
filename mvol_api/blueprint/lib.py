@@ -221,7 +221,7 @@ class OCRBuilder:
         leaf = ElementTree.Element("leaf")
         # Set leaf attribs
         leaf.attrib['leafNum'] = str(i)
-        leaf.attrib['humanReadableLeafNum'] = str(i)
+        leaf.attrib['humanReadableLeafNum'] = d['struct_page']
         leaf.attrib['type'] = ""
         leaf.attrib['access'] = "true"
         leaf.attrib['imgFile'] = str(i).zfill(8) + ".jpg"
