@@ -68,7 +68,8 @@ class OCRBuilder:
         return int(self.get_dc_identifier().split('-')[2].lstrip('0'))
 
     def get_publication_type(self):
-        return 'student' if self.get_dc_title() in ('Cap and Gown', 'Daily Maroon') else 'university'
+        return 'student' if self.get_dc_title() in ('Cap and Gown', 'Daily Maroon') else \
+            'university'
 
     def get_meta(self):
         meta = ElementTree.Element('{http://cdlib.org/xtf}meta')
@@ -203,7 +204,8 @@ class OCRBuilder:
                     spacing.append(x['width'])
                 # Else grab the previous space and the width
                 else:
-                    spacing.append(x['hpos'] - (hpos_widths[i - 1]['hpos'] + hpos_widths[i - 1]['width']))
+                    spacing.append(x['hpos'] - (hpos_widths[i - 1]['hpos'] +
+                                                hpos_widths[i - 1]['width']))
                     spacing.append(x['width'])
             line_data['spacing'] = spacing
 
@@ -265,7 +267,9 @@ class OCRBuilder:
                 line_element.attrib['t'] = str(round(line['t'] * y_scale))
                 line_element.attrib['r'] = str(round(line['r'] * x_scale))
                 line_element.attrib['b'] = str(round(line['b'] * y_scale))
-                line_element.attrib['spacing'] = " ".join(str(round(x * x_scale)) for x in line['spacing'])
+                line_element.attrib['spacing'] = " ".join(
+                    str(round(x * x_scale)) for x in line['spacing']
+                )
                 line_element.text = line['text']
                 leaf.append(line_element)
         return leaf
