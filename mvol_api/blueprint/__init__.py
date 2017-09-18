@@ -42,11 +42,6 @@ def handle_errors(error):
     return response
 
 
-class Root(Resource):
-    def get(self):
-        return {"Status": "Not broken!"}
-
-
 class Version(Resource):
     def get(self):
         return {"version": __version__}

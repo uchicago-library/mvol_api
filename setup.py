@@ -8,7 +8,8 @@ def readme():
 
 setup(
     name="mvol_api",
-    description="An API for mvol project specific information, backed by the digcollretriever and knowledge of the mvol filesystem specification.",
+    description="An API for mvol project specific information, backed by the digcollretriever " +
+    "and knowledge of the mvol filesystem specification.",
     version="0.0.1",
     long_description=readme(),
     author="Brian Balsamo",
