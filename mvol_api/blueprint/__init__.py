@@ -1,3 +1,6 @@
+"""
+mvol_api
+"""
 import logging
 from urllib.parse import unquote
 import requests
@@ -14,7 +17,14 @@ from os.path import join
 from flask import Blueprint, jsonify, Response
 from flask_restful import Resource, Api, reqparse
 
+
 from .lib import OCRBuilder
+from .exceptions import Error
+
+__author__ = "Brian Balsamo"
+__email__ = "balsamo@uchicago.edu"
+__version__ = "0.0.1"
+
 
 BLUEPRINT = Blueprint('mvol_api', __name__)
 
@@ -25,25 +35,21 @@ API = Api(BLUEPRINT)
 log = logging.getLogger(__name__)
 
 
-class Error(Exception):
-    err_name = "Error"
-    status_code = 500
-    message = ""
-
-    def __init__(self, message=None):
-        if message is not None:
-            self.message = message
-
-    def to_dict(self):
-        return {"message": self.message,
-                "error_name": self.err_name}
-
-
 @BLUEPRINT.errorhandler(Error)
 def handle_errors(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
+
+
+class Root(Resource):
+    def get(self):
+        return {"Status": "Not broken!"}
+
+
+class Version(Resource):
+    def get(self):
+        return {"version": __version__}
 
 
 def get_volumes(identifier):
@@ -56,7 +62,7 @@ def get_volumes(identifier):
     )
     volume_identifiers = []
     for x in listdir(path):
-        volume_identifiers.append(identifier+"-"+x)
+        volume_identifiers.append(identifier + "-" + x)
 
     # Filter
     volume_identifiers = [x for x in volume_identifiers if
@@ -75,7 +81,7 @@ def get_issues(identifier):
     )
     issue_identifiers = []
     for x in listdir(path):
-        issue_identifiers.append(identifier+"-"+x)
+        issue_identifiers.append(identifier + "-" + x)
 
     # Filter
     issue_identifiers = [x for x in issue_identifiers if
@@ -96,7 +102,7 @@ def get_pages(identifier):
     page_identifiers = []
     for x in listdir(path):
         page_identifiers.append(
-            identifier+"_{}".format(x.split("_")[1][:-4])
+            identifier + "_{}".format(x.split("_")[1][:-4])
         )
 
     # Filter
@@ -113,13 +119,12 @@ def get_struct(identifier):
     path = join(
         BLUEPRINT.config['MVOL_ROOT'],
         *path_parts,
-        identifier+".struct.txt"
+        identifier + ".struct.txt"
     )
     with open(path) as f:
         reader = DictReader(f, delimiter="\t")
         data = [x for x in reader]
     return data
-
 
 
 def response_200(r):
@@ -188,7 +193,7 @@ class OCR(Resource):
                     struct_page = x.get('page', "")
             info_dict = {}
             tif_techmd_request = requests.get(
-               "{}{}/tif/technical_metadata".format(BLUEPRINT.config['RETRIEVER_URL'], page_id)
+                "{}{}/tif/technical_metadata".format(BLUEPRINT.config['RETRIEVER_URL'], page_id)
             )
             response_200(tif_techmd_request)
             tif_techmd_json = tif_techmd_request.json()
@@ -215,8 +220,8 @@ class OCR(Resource):
         builder = OCRBuilder(
             dc_str,
             info_dicts,
-            min_year = args['min_year'],
-            max_year = args['max_year']
+            min_year=args['min_year'],
+            max_year=args['max_year']
         )
 
         return Response(builder.get_xtf_converted_book(), mimetype="text/xml")
@@ -242,5 +247,6 @@ def handle_configs(setup_state):
 
 
 API.add_resource(Root, "/")
+API.add_resource(Version, "/version")
 API.add_resource(Nav, "/<path:identifier>/nav")
 API.add_resource(OCR, "/<path:identifier>/ocr")

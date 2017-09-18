@@ -195,7 +195,7 @@ class OCRBuilder:
                 hpos_widths.append(
                     {'hpos': int(string.attrib['HPOS']),
                      'width': int(string.attrib['WIDTH'])}
-                     )
+                )
             spacing = []
             for i, x in enumerate(hpos_widths):
                 # If it's the first element just grab the width
@@ -203,7 +203,7 @@ class OCRBuilder:
                     spacing.append(x['width'])
                 # Else grab the previous space and the width
                 else:
-                    spacing.append(x['hpos'] - (hpos_widths[i-1]['hpos'] + hpos_widths[i-1]['width']))
+                    spacing.append(x['hpos'] - (hpos_widths[i - 1]['hpos'] + hpos_widths[i - 1]['width']))
                     spacing.append(x['width'])
             line_data['spacing'] = spacing
 
@@ -274,5 +274,5 @@ class OCRBuilder:
         root = ElementTree.Element('xtf-converted-book')
         root.append(self.get_meta())
         for i, d in enumerate(self.info_dicts):
-            root.append(self.get_leaf(i+1, d))
+            root.append(self.get_leaf(i + 1, d))
         return ElementTree.tostring(root, encoding="UTF-8", method='xml')
